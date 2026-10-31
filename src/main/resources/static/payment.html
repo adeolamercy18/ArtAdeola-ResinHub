@@ -1,0 +1,353 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment | ArtAdeola ResinHub</title>
+    <style>
+    :root {
+        --blue: #1746A2;
+        --deep-blue: #0A2050;
+        --silver: #C0C0C0;
+        --light-blue: #EDF3FF;
+        --white: #FFFFFF;
+        --text: #26344D;
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: var(--light-blue);
+        color: var(--text);
+    }
+
+    header {
+        background: var(--deep-blue);
+        color: var(--white);
+        padding: 22px 16px;
+        text-align: center;
+    }
+
+    header h1 {
+        margin: 0;
+        font-size: 25px;
+    }
+
+    header p {
+        margin: 8px 0 0;
+        color: var(--silver);
+    }
+
+    .container {
+        width: min(92%, 520px);
+        margin: 35px auto;
+    }
+
+    .payment-card {
+        background: var(--white);
+        padding: 28px;
+        border-radius: 14px;
+        border: 1px solid var(--silver);
+        box-shadow: 0 8px 24px rgba(10, 32, 80, 0.08);
+    }
+
+    h2 {
+        margin-top: 0;
+        color: var(--deep-blue);
+    }
+
+    .description {
+        line-height: 1.6;
+        color: #5b6575;
+    }
+
+    .total-box {
+        background: var(--light-blue);
+        border: 1px solid #d4def3;
+        padding: 20px;
+        margin: 24px 0;
+        border-radius: 10px;
+    }
+
+    .total-label {
+        font-size: 14px;
+        color: #5b6575;
+    }
+
+    .total-amount {
+        margin-top: 8px;
+        font-size: 30px;
+        font-weight: bold;
+        color: var(--blue);
+        overflow-wrap: anywhere;
+    }
+
+    label {
+        display: block;
+        font-weight: bold;
+        margin: 18px 0 8px;
+    }
+
+    input {
+        width: 100%;
+        min-height: 48px;
+        padding: 12px;
+        border: 1px solid var(--silver);
+        border-radius: 7px;
+        font-size: 16px;
+    }
+
+    input:focus {
+        outline: 2px solid var(--blue);
+        outline-offset: 2px;
+    }
+
+    button {
+        width: 100%;
+        min-height: 50px;
+        margin-top: 24px;
+        padding: 13px;
+        border: none;
+        border-radius: 7px;
+        background: var(--blue);
+        color: var(--white);
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background: var(--deep-blue);
+    }
+
+    button:disabled {
+        opacity: 0.65;
+        cursor: not-allowed;
+    }
+
+    #paymentMessage {
+        margin-top: 16px;
+        line-height: 1.5;
+        overflow-wrap: anywhere;
+    }
+
+    .back-link {
+        display: block;
+        text-align: center;
+        margin-top: 20px;
+        color: var(--blue);
+        text-decoration: none;
+    }
+
+    footer {
+        text-align: center;
+        padding: 20px;
+        color: #5b6575;
+        font-size: 13px;
+    }
+</style>
+</head>
+<body>
+<header>
+    <h1>ArtAdeola ResinHub</h1>
+    <p>Your Trusted Hub for Resin Materials</p>
+</header>
+<main class="container">
+    <section class="payment-card">
+        <h2>Complete Your Payment</h2>
+        <p class="description">
+            Review your order total and continue securely to Paystack
+            to complete your payment.
+        </p>
+
+        <div class="total-box">
+            <div class="total-label">Order Total</div>
+            <div class="total-amount" id="orderTotal">₦0.00</div>
+        </div>
+
+        <form id="paymentForm">
+            <label for="customerEmail">Email Address</label>
+            <input
+                    type="email"
+                    id="customerEmail"
+                    placeholder="Enter your registered email"
+                    autocomplete="email"
+                    required
+            >
+
+            <button type="submit" id="payButton">
+                Continue to Paystack
+            </button>
+        </form>
+
+        <p id="paymentMessage" role="status" aria-live="polite"></p>
+
+        <a class="back-link" href="/cart.html">Return to Cart</a>
+    </section>
+</main>
+<footer>
+    &copy; 2026 ArtAdeola ResinHub. All rights reserved.
+</footer>
+<script>
+    const paymentForm = document.getElementById("paymentForm");
+    const emailInput = document.getElementById("customerEmail");
+    const orderTotalElement = document.getElementById("orderTotal");
+    const paymentMessage = document.getElementById("paymentMessage");
+    const payButton = document.getElementById("payButton");
+
+    // Use the same customer-specific cart key as products.html and cart.html.
+    const customerId = sessionStorage.getItem("customerId");
+    const cartKey = "artadeola_cart_" + customerId;
+
+    let cart = [];
+
+    try {
+        const savedCart = localStorage.getItem(cartKey);
+        cart = savedCart ? JSON.parse(savedCart) : [];
+    } catch (error) {
+        cart = [];
+    }
+
+    function getOrderTotal() {
+        if (!Array.isArray(cart) || cart.length === 0) {
+            return 0;
+        }
+
+        return cart.reduce((total, item) => {
+            const price = Number(item.price);
+            const quantity = Number(item.quantity ?? 1);
+
+            if (
+                !Number.isFinite(price) ||
+                !Number.isFinite(quantity) ||
+                price < 0 ||
+                quantity <= 0
+            ) {
+                throw new Error("An item in your cart has invalid pricing.");
+            }
+
+            return total + price * quantity;
+        }, 0);
+    }
+
+    let orderTotal = 0;
+
+    try {
+        orderTotal = getOrderTotal();
+
+        if (orderTotal <= 0) {
+            paymentMessage.textContent =
+                "Your cart is empty or its total is invalid. Return to your cart and check your items.";
+            payButton.disabled = true;
+        } else {
+            orderTotalElement.textContent = orderTotal.toLocaleString(
+                "en-NG",
+                {
+                    style: "currency",
+                    currency: "NGN"
+                }
+            );
+        }
+    } catch (error) {
+        paymentMessage.textContent = error.message;
+        payButton.disabled = true;
+    }
+
+    // Reuse the email saved by your existing login page, if available.
+    const savedEmail = sessionStorage.getItem("customerEmail");
+
+    if (savedEmail) {
+        emailInput.value = savedEmail;
+    }
+
+    paymentForm.addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        if (!Array.isArray(cart) || cart.length === 0 || orderTotal <= 0) {
+            paymentMessage.textContent =
+                "Your cart is empty. Please return to your cart.";
+            return;
+        }
+
+        if (!emailInput.checkValidity()) {
+            emailInput.reportValidity();
+            return;
+        }
+
+        const email = emailInput.value.trim();
+
+        // Paystack expects the amount in kobo, not naira.
+        const amountInKobo = Math.round(orderTotal * 100);
+
+        if (!Number.isSafeInteger(amountInKobo) || amountInKobo <= 0) {
+            paymentMessage.textContent = "Please check your order total.";
+            return;
+        }
+
+        payButton.disabled = true;
+        paymentMessage.textContent = "Connecting to Paystack...";
+
+        try {
+            const response = await fetch("/api/payments/initialize", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    email: email,
+                    amount: amountInKobo
+                })
+            });
+
+            const responseText = await response.text();
+            let result;
+
+            try {
+                result = responseText ? JSON.parse(responseText) : {};
+            } catch {
+                throw new Error(
+                    "The server returned an invalid response. Please check the backend."
+                );
+            }
+
+
+if (!response.ok || result.status !== true) {
+    paymentMessage.textContent =
+        "HTTP Status: " + response.status +
+        "\nServer response: " + (responseText || "Empty response");
+
+    console.error("Response status:", response.status);
+    console.error("Response body:", responseText);
+
+    payButton.disabled = false;
+    return;
+}
+
+
+            const authorizationUrl = result.data?.authorization_url;
+
+            if (!authorizationUrl) {
+                throw new Error(
+                    "Paystack did not return a payment link. Please check the backend response."
+                );
+            }
+
+            paymentMessage.textContent = "Redirecting to Paystack...";
+            window.location.assign(authorizationUrl);
+
+        } catch (error) {
+            paymentMessage.textContent =
+                error.message || "Payment could not be started. Please try again.";
+
+            payButton.disabled = false;
+        }
+    });
+</script>
+</body>
+</html>

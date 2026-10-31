@@ -1,0 +1,535 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart | ArtAdeola ResinHub</title>
+
+    <style>
+        :root {
+            --blue: #1746A2;
+            --deep-blue: #0A2050;
+            --silver: #C0C0C0;
+            --light-blue: #EDF3FF;
+            --white: #FFFFFF;
+            --border: #DDE3EF;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #F7F9FD;
+            color: var(--deep-blue);
+        }
+
+        header {
+            background: var(--blue);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        header h1 {
+            margin: 0 0 8px;
+        }
+
+        header p {
+            margin: 0;
+        }
+
+        nav {
+            display: flex;
+            justify-content: center;
+            gap: 22px;
+            flex-wrap: wrap;
+            padding: 15px;
+            background: white;
+            border-bottom: 1px solid var(--border);
+        }
+
+        nav a {
+            color: var(--blue);
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        main {
+            width: min(1000px, 94%);
+            margin: 30px auto;
+        }
+
+        .cart-panel,
+        .summary {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            margin-top: 0;
+        }
+
+        .cart-item {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: 15px;
+            padding: 18px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+
+        .item-name {
+            font-weight: bold;
+            overflow-wrap: anywhere;
+        }
+
+        .item-price {
+            margin-top: 7px;
+            color: #52617A;
+        }
+
+        .item-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+
+        button,
+        input {
+            font: inherit;
+        }
+
+        button {
+            cursor: pointer;
+            border: none;
+            border-radius: 6px;
+            padding: 10px 14px;
+        }
+
+        .quantity-button {
+            background: var(--light-blue);
+            color: var(--blue);
+            font-weight: bold;
+        }
+
+        .remove-button {
+            background: #FCE8E8;
+            color: #A32121;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            margin: 14px 0;
+        }
+
+        .summary-total {
+            border-top: 1px solid var(--border);
+            padding-top: 15px;
+            font-size: 1.15rem;
+            font-weight: bold;
+        }
+
+        .checkout-button {
+            display: block;
+            width: 100%;
+            background: var(--blue);
+            color: white;
+            font-weight: bold;
+            padding: 15px;
+            margin-top: 18px;
+        }
+
+        .checkout-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .continue-button {
+            display: inline-block;
+            margin-top: 15px;
+            color: var(--blue);
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .empty-cart {
+            text-align: center;
+            padding: 25px 10px;
+        }
+
+        .message {
+            margin-top: 12px;
+            overflow-wrap: anywhere;
+        }
+
+        .error {
+            color: #A32121;
+        }
+
+        .success {
+            color: #176B36;
+        }
+
+        @media (max-width: 500px) {
+            main {
+                width: 94%;
+                margin: 18px auto;
+            }
+
+            .cart-item {
+                grid-template-columns: 1fr;
+            }
+
+            .cart-panel,
+            .summary {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>ArtAdeola ResinHub</h1>
+    <p>Your Trusted Hub for Resin Materials</p>
+</header>
+
+<nav>
+    <a href="index.html">Home</a>
+    <a href="products.html">Products</a>
+    <a href="cart.html">Shopping Cart</a>
+</nav>
+
+<main>
+    <section class="cart-panel">
+        <h2>My Shopping Cart</h2>
+        <p id="itemCount">0 items</p>
+
+        <div id="cartItems" aria-live="polite">
+            Loading cart...
+        </div>
+
+        <a class="continue-button" href="products.html">
+            ← Continue Shopping
+        </a>
+    </section>
+
+    <section class="summary">
+        <h2>Order Summary</h2>
+
+        <div class="summary-row">
+            <span>Total quantity</span>
+            <span id="quantityTotal">0</span>
+        </div>
+
+        <div class="summary-row summary-total">
+            <span>Total</span>
+            <span id="cartTotal">₦0.00</span>
+        </div>
+
+        <button
+                type="button"
+                id="checkoutBtn"
+                class="checkout-button"
+                disabled>
+            Proceed to Payment
+        </button>
+
+        <p id="paymentMessage" class="message" aria-live="polite"></p>
+    </section>
+</main>
+
+<script>
+    /*
+     * This must match the storage key used by products.html.
+     * Do not add a second login requirement on this page.
+     */
+   const customerId = sessionStorage.getItem("customerId");
+    const cartKey = "artadeola_cart_" + customerId;
+
+    const cartItemsElement = document.getElementById("cartItems");
+    const itemCountElement = document.getElementById("itemCount");
+    const quantityTotalElement = document.getElementById("quantityTotal");
+    const cartTotalElement = document.getElementById("cartTotal");
+    const checkoutButton = document.getElementById("checkoutBtn");
+    const paymentMessage = document.getElementById("paymentMessage");
+
+    let cart = [];
+
+    function readCart() {
+        try {
+            const savedCart = JSON.parse(
+                localStorage.getItem(cartKey) || "[]"
+            );
+
+            cart = Array.isArray(savedCart) ? savedCart : [];
+        } catch (error) {
+            cart = [];
+        }
+    }
+
+    function saveCart() {
+        localStorage.setItem(cartKey, JSON.stringify(cart));
+    }
+
+    function getPrice(item) {
+        const price = Number(item.price);
+
+        return Number.isFinite(price) && price >= 0
+            ? price
+            : 0;
+    }
+
+    function getQuantity(item) {
+        const quantity = Number(item.quantity);
+
+        return Number.isInteger(quantity) && quantity > 0
+            ? quantity
+            : 1;
+    }
+
+    function formatMoney(amount) {
+        return "₦" + amount.toLocaleString("en-NG", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+
+    function renderCart() {
+        readCart();
+
+        cartItemsElement.replaceChildren();
+
+        let quantityTotal = 0;
+        let total = 0;
+
+        if (!cart || cart.length === 0) {
+            const emptyMessage = document.createElement("div");
+            emptyMessage.className = "empty-cart";
+            emptyMessage.textContent = "Your shopping cart is empty.";
+
+            cartItemsElement.appendChild(emptyMessage);
+        }
+
+        cart.forEach((item, index) => {
+            const price = getPrice(item);
+            const quantity = getQuantity(item);
+
+            quantityTotal += quantity;
+            total += price * quantity;
+
+            const row = document.createElement("div");
+            row.className = "cart-item";
+
+            const details = document.createElement("div");
+
+            const name = document.createElement("div");
+            name.className = "item-name";
+            name.textContent = item.name || "Product";
+
+            const priceText = document.createElement("div");
+            priceText.className = "item-price";
+            priceText.textContent =
+                formatMoney(price) + " each";
+
+            const controls = document.createElement("div");
+            controls.className = "item-controls";
+
+            const decreaseButton = document.createElement("button");
+            decreaseButton.type = "button";
+            decreaseButton.className = "quantity-button";
+            decreaseButton.textContent = "−";
+            decreaseButton.setAttribute(
+                "aria-label",
+                "Decrease quantity of " + (item.name || "product")
+            );
+            decreaseButton.addEventListener("click", () => {
+                changeQuantity(index, -1);
+            });
+
+            const quantityText = document.createElement("span");
+            quantityText.textContent = String(quantity);
+
+            const increaseButton = document.createElement("button");
+            increaseButton.type = "button";
+            increaseButton.className = "quantity-button";
+            increaseButton.textContent = "+";
+            increaseButton.setAttribute(
+                "aria-label",
+                "Increase quantity of " + (item.name || "product")
+            );
+            increaseButton.addEventListener("click", () => {
+                changeQuantity(index, 1);
+            });
+
+            const removeButton = document.createElement("button");
+            removeButton.type = "button";
+            removeButton.className = "remove-button";
+            removeButton.textContent = "Remove";
+            removeButton.addEventListener("click", () => {
+                removeItem(index);
+            });
+
+            controls.append(
+                decreaseButton,
+                quantityText,
+                increaseButton,
+                removeButton
+            );
+
+            details.append(name, priceText, controls);
+
+            const lineTotal = document.createElement("div");
+            lineTotal.className = "item-name";
+            lineTotal.textContent = formatMoney(price * quantity);
+
+            row.append(details, lineTotal);
+            cartItemsElement.appendChild(row);
+        });
+
+        itemCountElement.textContent =
+            quantityTotal + (quantityTotal === 1 ? " item" : " items");
+
+        quantityTotalElement.textContent = String(quantityTotal);
+        cartTotalElement.textContent = formatMoney(total);
+
+        checkoutButton.disabled = cart.length === 0;
+    }
+
+    function changeQuantity(index, change) {
+        if (!cart[index]) {
+            return;
+        }
+
+        const newQuantity = getQuantity(cart[index]) + change;
+
+        if (newQuantity <= 0) {
+            removeItem(index);
+            return;
+        }
+
+        cart[index].quantity = newQuantity;
+        saveCart();
+        renderCart();
+    }
+
+    function removeItem(index) {
+        cart.splice(index, 1);
+        saveCart();
+        renderCart();
+    }
+
+    /*
+     * Payment endpoint expected:
+     * POST /api/payments/initialize
+     *
+     * The Spring Boot backend must create the order, calculate its
+     * amount from trusted product prices, initialize Paystack, and
+     * return the Paystack authorization URL.
+     *
+     * Never put your Paystack secret key in this file.
+     */
+    checkoutButton.addEventListener("click", async () => {
+        if (cart.length === 0) {
+            paymentMessage.textContent = "Your cart is empty.";
+            paymentMessage.className = "message error";
+            return;
+        }
+
+        const customerEmail = sessionStorage.getItem("customerEmail",);
+
+        window.location.href = "/payment.html";
+        return;
+
+
+        const amount = Math.round(Number(cartTotal) * 100);
+
+        paymentMessage.textContent = "";
+        checkoutButton.disabled = true;
+        checkoutButton.textContent = "Preparing payment...";
+
+        try {
+            const response = await fetch("/api/payments/initialize", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    email: customerEmail,
+                    amount: amount
+                })
+            });
+
+
+
+const responseText = await response.text();
+
+console.log("Paystack HTTP status:", response.status);
+console.log("Paystack response:", responseText);
+
+let result = {};
+
+try {
+    result = responseText ? JSON.parse(responseText) : {};
+} catch (error) {
+    throw new Error("The server returned an invalid response. Check the browser console.");
+}
+
+
+if (!response.ok || result.status !== true) {
+    console.error("Paystack HTTP status:", response.status);
+    console.error("Paystack response:", result);
+
+    throw new Error(
+          result.message ||
+          JSON.stringify(result) ||
+         "Unable to initialize Paystack payment."
+    );
+}
+
+const authorizationUrl = result.data?.authorization_url;
+
+if (!authorizationUrl) {
+    console.log("Complete Paystack result:", result);
+    throw new Error("Paystack did not return a payment link. Check the backend response.");
+}
+
+paymentMessage.textContent = "Redirecting to Paystack...";
+window.location.href = authorizationUrl;
+
+
+
+
+        } catch (error) {
+            paymentMessage.textContent =
+                error.message ||
+                "Payment could not be started. Please try again.";
+
+            paymentMessage.className = "message error";
+
+            checkoutButton.disabled = false;
+            checkoutButton.textContent = "Proceed to Payment";
+        }
+    });
+
+    renderCart();
+</script>
+
+</body>
+</html>

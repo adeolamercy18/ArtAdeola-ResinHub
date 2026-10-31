@@ -1,0 +1,294 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account | ArtAdeola ResinHub</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #edf3ff;
+            color: #10285f;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .register-container {
+            background: white;
+            width: 100%;
+            max-width: 430px;
+            padding: 35px 28px;
+            border-radius: 18px;
+            box-shadow: 0 8px 30px rgba(16, 40, 95, 0.12);
+        }
+
+        .brand {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .brand h1 {
+            color: #173a8a;
+            font-size: 27px;
+            margin-bottom: 8px;
+        }
+
+        .brand p {
+            color: #68748c;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        h2 {
+            font-size: 22px;
+            margin-bottom: 22px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 17px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 7px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid #c0c5ce;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #173a8a;
+            box-shadow: 0 0 0 2px rgba(23, 58, 138, 0.1);
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            margin-top: 8px;
+            background: #173a8a;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+        }
+
+        .message {
+            margin-top: 15px;
+            font-size: 14px;
+            text-align: center;
+            line-height: 1.5;
+            overflow-wrap: anywhere;
+        }
+
+        .login-link {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .login-link a {
+            color: #173a8a;
+            font-weight: bold;
+        }
+
+        .back-link {
+            display: block;
+            margin-top: 18px;
+            text-align: center;
+            font-size: 13px;
+            color: #68748c;
+            text-decoration: none;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="register-container">
+
+    <div class="brand">
+        <h1>ArtAdeola ResinHub</h1>
+        <p>Your Trusted Hub for Resin Materials</p>
+    </div>
+
+    <h2>Create Your Account</h2>
+
+    <form id="registerForm">
+
+        <div class="form-group">
+            <label for="name">Full Name</label>
+            <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    autocomplete="name"
+                    required>
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email Address</label>
+            <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    autocomplete="email"
+                    required>
+        </div>
+
+        <div class="form-group">
+            <label for="phoneNumber">Phone Number</label>
+            <input
+                    type="tel"
+                    id="phoneNumber"
+                    name="phoneNumber"
+                    autocomplete="tel"
+                    required>
+        </div>
+
+        <div class="form-group">
+            <label for="password">Password</label>
+            <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    autocomplete="new-password"
+                    minlength="8"
+                    required>
+        </div>
+
+        <div class="form-group">
+            <label for="confirmPassword">Confirm Password</label>
+            <input
+                    type="password"
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    autocomplete="new-password"
+                    minlength="8"
+                    required>
+        </div>
+
+        <button type="submit" id="registerButton">
+            Create Account
+        </button>
+
+        <p id="message" class="message" role="status" aria-live="polite"></p>
+
+    </form>
+
+    <p class="login-link">
+        Already have an account?
+        <a href="login.html">Sign In</a>
+    </p>
+
+    <a class="back-link" href="index.html">Back to Home</a>
+
+</div>
+
+<script>
+    const registerForm = document.getElementById("registerForm");
+    const registerButton = document.getElementById("registerButton");
+    const message = document.getElementById("message");
+
+    registerForm.addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        const name = document.getElementById("name").value.trim();
+        const email = document.getElementById("email").value.trim();
+        const phoneNumber = document.getElementById("phoneNumber").value.trim();
+        const password = document.getElementById("password").value;
+        const confirmPassword = document.getElementById("confirmPassword").value;
+
+        if (password !== confirmPassword) {
+            message.style.color = "#b00020";
+            message.textContent = "Your passwords do not match.";
+            return;
+        }
+
+        const customer = {
+            name: name,
+            email: email,
+            phoneNumber: phoneNumber,
+            password: password
+        };
+
+        registerButton.disabled = true;
+        registerButton.textContent = "Creating Account...";
+        message.style.color = "#68748c";
+        message.textContent = "Please wait while your account is created.";
+
+        try {
+            const response = await fetch(
+                "http://localhost:8080/api/customers/register",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(customer)
+                }
+            );
+
+            const resultText = await response.text();
+
+            if (!response.ok) {
+                throw new Error(
+                    resultText || "Registration failed. Please try again."
+                );
+            }
+
+            message.style.color = "green";
+            message.textContent =
+                "Account created successfully! Redirecting to sign in...";
+
+            registerForm.reset();
+
+            setTimeout(function () {
+                window.location.href = "login.html";
+            }, 1500);
+
+        } catch (error) {
+            message.style.color = "#b00020";
+
+            if (error instanceof TypeError) {
+                message.textContent =
+                    "Could not connect to the server. Ensure Spring Boot is running.";
+            } else {
+                message.textContent = error.message;
+            }
+        } finally {
+            registerButton.disabled = false;
+            registerButton.textContent = "Create Account";
+        }
+    });
+</script>
+
+</body>
+</html>

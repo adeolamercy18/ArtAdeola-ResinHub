@@ -1,0 +1,747 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products | ArtAdeola ResinHub</title>
+
+    <script>
+        if (sessionStorage.getItem("artadeolaSignedIn") !== "true" ||
+        !sessionStorage.getItem("customerId")
+        ) {
+            window.location.replace("/login.html");
+        }
+    </script>
+
+    <style>
+        :root {
+            --royal-blue: #1746A2;
+            --deep-blue: #10285F;
+            --silver: #C0C5CE;
+            --light-silver: #EEF1F6;
+            --light-blue: #EDF3FF;
+            --white: #FFFFFF;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: var(--light-blue);
+            color: var(--deep-blue);
+        }
+
+        header {
+            background: white;
+            padding: 16px 6%;
+            border-bottom: 2px solid var(--silver);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand img {
+            width: 58px;
+            height: 58px;
+            object-fit: contain;
+        }
+
+        .brand h1 {
+            color: var(--royal-blue);
+            font-size: 21px;
+        }
+
+        .brand p {
+            color: #65718A;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 18px;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: var(--royal-blue);
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .logout-button {
+            background: var(--royal-blue);
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 7px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .hero {
+            background: linear-gradient(120deg, var(--deep-blue), var(--royal-blue));
+            color: white;
+            padding: 45px 6%;
+            text-align: center;
+        }
+
+        .hero h2 {
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+
+        .hero p {
+            max-width: 650px;
+            margin: auto;
+            line-height: 1.7;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1250px;
+            margin: 30px auto 50px;
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 28px;
+        }
+
+        .toolbar input,
+        .toolbar select {
+            flex: 1;
+            min-width: 180px;
+            padding: 13px;
+            border: 1px solid var(--silver);
+            border-radius: 8px;
+            background: white;
+            font-size: 14px;
+        }
+
+        .category-section {
+            margin-bottom: 42px;
+        }
+
+        .category-title {
+            color: var(--royal-blue);
+            font-size: 24px;
+            border-left: 5px solid var(--royal-blue);
+            padding: 7px 0 7px 13px;
+            margin-bottom: 20px;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 22px;
+        }
+
+        .product-card {
+            background: white;
+            border: 1px solid var(--silver);
+            border-radius: 13px;
+            overflow: hidden;
+            box-shadow: 0 5px 16px rgba(16, 40, 95, 0.07);
+        }
+
+        .product-image,
+        .image-placeholder {
+            width: 100%;
+            height: 210px;
+            object-fit: contain;
+            padding: 12px;
+            background: white;
+            border-bottom: 1px solid var(--light-silver);
+        }
+
+        .image-placeholder {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #65718A;
+            text-align: center;
+        }
+
+        .product-info {
+            padding: 17px;
+        }
+
+        .product-info h4 {
+            font-size: 17px;
+            margin-bottom: 9px;
+        }
+
+        .product-description {
+            color: #65718A;
+            font-size: 13px;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .product-price {
+            font-size: 19px;
+            font-weight: bold;
+            color: var(--royal-blue);
+            margin-bottom: 10px;
+        }
+
+        .availability {
+            display: inline-block;
+            font-size: 12px;
+            font-weight: bold;
+            padding: 6px 9px;
+            border-radius: 20px;
+            margin-bottom: 13px;
+        }
+
+        .in-stock {
+            background: #E4F7EA;
+            color: #176B35;
+        }
+
+        .out-of-stock {
+            background: #FFF0F0;
+            color: #A32121;
+        }
+
+        .add-button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: var(--royal-blue);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .add-button:hover {
+            background: var(--deep-blue);
+        }
+
+        .add-button:disabled {
+            background: var(--silver);
+            cursor: not-allowed;
+        }
+
+        .message {
+            background: white;
+            border: 1px solid var(--silver);
+            border-radius: 10px;
+            padding: 25px;
+            text-align: center;
+            line-height: 1.7;
+        }
+
+        .cart-bar {
+            position: sticky;
+            bottom: 0;
+            background: var(--deep-blue);
+            color: white;
+            padding: 16px 6%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .cart-bar button {
+            background: white;
+            color: var(--royal-blue);
+            border: none;
+            border-radius: 8px;
+            padding: 12px 18px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        footer {
+            text-align: center;
+            background: var(--deep-blue);
+            color: white;
+            padding: 22px;
+            font-size: 13px;
+        }
+
+        @media (max-width: 600px) {
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .hero h2 {
+                font-size: 26px;
+            }
+
+            .product-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 12px;
+            }
+
+            .product-image,
+            .image-placeholder {
+                height: 155px;
+            }
+
+            .product-info {
+                padding: 12px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <div class="brand">
+        <img src="/images/artadeola-logo.png"
+             alt="ArtAdeola ResinHub logo"
+             onerror="this.style.display='none'">
+
+        <div>
+            <h1>ArtAdeola ResinHub</h1>
+            <p>Your Trusted Hub for Resin Materials</p>
+        </div>
+    </div>
+
+    <nav>
+        <a href="/index.html">Home</a>
+        <a href="/why-us.html">Why Us</a>
+        <a href="/products.html">Products</a>
+        <a href="/cart.html">My Cart</a>
+        <button class="logout-button" id="logoutButton" type="button">
+            Sign Out
+        </button>
+    </nav>
+</header>
+
+<section class="hero">
+    <h2>Explore Our Products</h2>
+    <p>
+        Find the resin materials, moulds, colourants, tools, and accessories
+        you need to bring your creativity to life.
+    </p>
+</section>
+
+<main class="container">
+
+    <div class="toolbar">
+        <input
+                type="search"
+                id="searchInput"
+                placeholder="Search for a product..."
+                aria-label="Search products">
+
+        <select id="categoryFilter" aria-label="Filter by category">
+            <option value="">All Categories</option>
+            <option value="Resin & Chemicals">Resin & Chemicals</option>
+            <option value="Moulds">Moulds</option>
+            <option value="Colourants & Decorative Additives">
+                Colourants & Decorative Additives
+            </option>
+            <option value="Tools & Equipment">Tools & Equipment</option>
+            <option value="Accessories">Accessories</option>
+        </select>
+    </div>
+
+    <div id="productsContainer">
+        <p class="message">Loading products...</p>
+    </div>
+
+</main>
+
+<div class="cart-bar">
+    <div>
+        <strong>My Cart:</strong>
+        <span id="cartCount">0</span> item(s)
+        &nbsp; | &nbsp;
+        <strong>Total:</strong>
+        ₦<span id="cartTotal">0.00</span>
+    </div>
+
+    <button id="viewCartButton" type="button">View Cart</button>
+</div>
+
+<footer>
+    &copy; <span id="year"></span> ArtAdeola ResinHub. All rights reserved.
+</footer>
+
+<script>
+    const customerId = sessionStorage.getItem("customerId");
+    const cartKey = "artadeola_cart_" + customerId;
+    const productsContainer = document.getElementById("productsContainer");
+    const searchInput = document.getElementById("searchInput");
+    const categoryFilter = document.getElementById("categoryFilter");
+
+    const categoryNames = [
+        "Resin & Chemicals",
+        "Moulds",
+        "Colourants & Decorative Additives",
+        "Tools & Equipment",
+        "Accessories"
+    ];
+
+    let allProducts = [];
+
+    document.getElementById("year").textContent =
+        new Date().getFullYear();
+
+    document.getElementById("logoutButton").addEventListener("click", function () {
+        sessionStorage.removeItem("artadeolaSignedIn");
+        sessionStorage.removeItem("artadeolaCustomerEmail");
+        window.location.replace("/login.html");
+    });
+
+    document.getElementById("viewCartButton").addEventListener("click", function () {
+        window.location.href = "/cart.html";
+    });
+
+    function formatPrice(value) {
+        const price = Number(value);
+
+        if (!Number.isFinite(price)) {
+            return "Price to be confirmed";
+        }
+
+        return price.toLocaleString("en-NG", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    }
+
+    function getCategory(product) {
+        const category = String(product.category || "").trim();
+
+        const aliases = {
+            "resin": "Resin & Chemicals",
+            "chemicals": "Resin & Chemicals",
+            "resin and chemicals": "Resin & Chemicals",
+            "mould": "Moulds",
+            "molds": "Moulds",
+            "moulds": "Moulds",
+            "colorants": "Colourants & Decorative Additives",
+            "colourants": "Colourants & Decorative Additives",
+            "colourants and decorative additives":
+                "Colourants & Decorative Additives",
+            "tools": "Tools & Equipment",
+            "equipment": "Tools & Equipment",
+            "tools and equipment": "Tools & Equipment"
+        };
+
+        return aliases[category.toLowerCase()] || category;
+    }
+
+    function getImageUrl(product) {
+        const imageUrl = String(product.imageUrl || "").trim();
+
+        if (!imageUrl) {
+            return "";
+        }
+
+        if (/^https?:\/\//i.test(imageUrl)) {
+            return imageUrl;
+        }
+
+        return "/" + imageUrl.replace(/^\/+/, "");
+    }
+
+    function createProductCard(product) {
+        const card = document.createElement("article");
+        card.className = "product-card";
+
+        const imageUrl = getImageUrl(product);
+
+        const isAvailable =
+            product.available === true ||
+            String(product.available).toLowerCase() === "true";
+
+        if (imageUrl) {
+            const image = document.createElement("img");
+
+            image.className = "product-image";
+            image.src = imageUrl;
+            image.alt = product.name || "Resin material";
+            image.loading = "lazy";
+
+            image.onerror = function () {
+                const placeholder = document.createElement("div");
+                placeholder.className = "image-placeholder";
+                placeholder.textContent = "Product image unavailable";
+                image.replaceWith(placeholder);
+            };
+
+            card.appendChild(image);
+        } else {
+            const placeholder = document.createElement("div");
+            placeholder.className = "image-placeholder";
+            placeholder.textContent = "Image coming soon";
+            card.appendChild(placeholder);
+        }
+
+        const info = document.createElement("div");
+        info.className = "product-info";
+
+        const title = document.createElement("h4");
+        title.textContent = product.name || "Unnamed product";
+        info.appendChild(title);
+
+        const description = document.createElement("p");
+        description.className = "product-description";
+        description.textContent =
+            product.description || product.subcategory || "Quality resin supplies.";
+        info.appendChild(description);
+
+        const price = document.createElement("p");
+        price.className = "product-price";
+
+        price.textContent =
+            product.price !== null &&
+            product.price !== undefined &&
+            product.price !== ""
+                ? "₦" + formatPrice(product.price)
+                : "Price to be confirmed";
+
+        info.appendChild(price);
+
+        const availability = document.createElement("span");
+        availability.className =
+            "availability " + (isAvailable ? "in-stock" : "out-of-stock");
+
+        availability.textContent =
+            isAvailable ? "In Stock" : "Currently Unavailable";
+
+        info.appendChild(availability);
+
+        const button = document.createElement("button");
+        button.className = "add-button";
+        button.type = "button";
+        button.textContent = isAvailable ? "Add to Cart" : "Unavailable";
+        button.disabled = !isAvailable;
+
+        button.addEventListener("click", function () {
+            addToCart(product);
+        });
+
+        info.appendChild(button);
+        card.appendChild(info);
+
+        return card;
+    }
+
+    function renderProducts() {
+        productsContainer.replaceChildren();
+
+        const searchTerm = searchInput.value.trim().toLowerCase();
+        const selectedCategory = categoryFilter.value;
+
+        const filteredProducts = allProducts.filter(function (product) {
+            const category = getCategory(product);
+
+            const searchableText = [
+                product.name,
+                product.description,
+                product.subcategory,
+                category
+            ].join(" ").toLowerCase();
+
+            return searchableText.includes(searchTerm) &&
+                (!selectedCategory || category === selectedCategory);
+        });
+
+        if (filteredProducts.length === 0) {
+            const empty = document.createElement("p");
+            empty.className = "message";
+
+            empty.textContent = allProducts.length === 0
+                ? "No products have been added yet."
+                : "No products match your search. Try another keyword or category.";
+
+            productsContainer.appendChild(empty);
+            return;
+        }
+
+        categoryNames.forEach(function (categoryName) {
+            const categoryProducts = filteredProducts.filter(function (product) {
+                return getCategory(product) === categoryName;
+            });
+
+            if (categoryProducts.length === 0) {
+                return;
+            }
+
+            const section = document.createElement("section");
+            section.className = "category-section";
+
+            const heading = document.createElement("h3");
+            heading.className = "category-title";
+            heading.textContent = categoryName;
+
+            section.appendChild(heading);
+
+            const grid = document.createElement("div");
+            grid.className = "product-grid";
+
+            categoryProducts.forEach(function (product) {
+                grid.appendChild(createProductCard(product));
+            });
+
+            section.appendChild(grid);
+            productsContainer.appendChild(section);
+        });
+
+        const otherProducts = filteredProducts.filter(function (product) {
+            return !categoryNames.includes(getCategory(product));
+        });
+
+        if (otherProducts.length > 0) {
+            const section = document.createElement("section");
+            section.className = "category-section";
+
+            const heading = document.createElement("h3");
+            heading.className = "category-title";
+            heading.textContent = "Other Products";
+
+            section.appendChild(heading);
+
+            const grid = document.createElement("div");
+            grid.className = "product-grid";
+
+            otherProducts.forEach(function (product) {
+                grid.appendChild(createProductCard(product));
+            });
+
+            section.appendChild(grid);
+            productsContainer.appendChild(section);
+        }
+    }
+
+    function loadCart() {
+        try {
+            const cart = JSON.parse(
+                localStorage.getItem(cartKey) || "[]"
+            );
+
+            return Array.isArray(cart) ? cart : [];
+        } catch (error) {
+            return [];
+        }
+    }
+
+    function updateCartBar() {
+        const cart = loadCart();
+
+        const count = cart.reduce(function (sum, item) {
+            return sum + (Number(item.quantity) || 0);
+        }, 0);
+
+        const total = cart.reduce(function (sum, item) {
+            return sum +
+                (Number(item.price) || 0) *
+                (Number(item.quantity) || 0);
+        }, 0);
+
+        document.getElementById("cartCount").textContent = count;
+        document.getElementById("cartTotal").textContent = formatPrice(total);
+    }
+
+    function addToCart(product) {
+        const cart = loadCart();
+
+        const existingItem = cart.find(function (item) {
+            return String(item.id) === String(product.id);
+        });
+
+        if (existingItem) {
+            existingItem.quantity =
+                (Number(existingItem.quantity) || 0) + 1;
+        } else {
+            cart.push({
+                id: product.id,
+                name: product.name || "Product",
+                price: Number(product.price) || 0,
+                quantity: 1
+            });
+        }
+
+        localStorage.setItem(cartKey, JSON.stringify(cart));
+        
+
+
+        updateCartBar();
+
+        alert((product.name || "Product") + " has been added to your cart.");
+    }
+
+    searchInput.addEventListener("input", renderProducts);
+    categoryFilter.addEventListener("change", renderProducts);
+
+    async function loadProducts() {
+        try {
+            const response = await fetch("/api/products", {
+                headers: {
+                    "Accept": "application/json"
+                },
+                credentials: "same-origin"
+            });
+
+            if (response.status === 401 || response.status === 403) {
+                sessionStorage.removeItem("artadeolaSignedIn");
+                window.location.replace("/login.html");
+                return;
+            }
+
+            if (!response.ok) {
+                throw new Error("Server could not load products.");
+            }
+
+            const data = await response.json();
+
+            if (!Array.isArray(data)) {
+                throw new Error("Product API did not return a list.");
+            }
+
+            allProducts = data;
+            renderProducts();
+
+        } catch (error) {
+            productsContainer.replaceChildren();
+
+            const message = document.createElement("p");
+            message.className = "message";
+            message.textContent =
+                "We couldn't load products. Check that your backend is running and try again.";
+
+            productsContainer.appendChild(message);
+            console.error("Product loading error:", error);
+        }
+    }
+
+    updateCartBar();
+
+    if (sessionStorage.getItem("artadeolaSignedIn") === "true") {
+        loadProducts();
+    }
+</script>
+
+</body>
+</html>

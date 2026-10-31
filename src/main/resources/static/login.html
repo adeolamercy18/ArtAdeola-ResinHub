@@ -1,0 +1,134 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Login | ArtAdeola ResinHub</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body class="register-page">
+
+<header class="site-header">
+    <a href="/index.html">
+        <img src="/images/artadeola-logo.png"
+             alt="ArtAdeola ResinHub Logo"
+             class="register-logo">
+    </a>
+
+    <nav>
+        <a href="/index.html">Home</a>
+        <a href="/why-us.html">Why Us</a>
+        <a href="/products.html">Products</a>
+        <a href="/register.html">Create Account</a>
+    </nav>
+</header>
+
+<main class="register-main">
+    <section class="register-card">
+
+        <h1 class="register-heading">Welcome Back!</h1>
+
+        <p>Sign in to your ArtAdeola ResinHub account.</p>
+
+        <form id="loginForm">
+
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="Enter your email"
+                        required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Enter your password"
+                        required>
+            </div>
+
+            <button type="submit" class="register-button">
+                Sign In
+            </button>
+
+            <p id="loginMessage" class="form-message"
+               role="status" aria-live="polite"></p>
+
+        </form>
+
+        <p class="register-login-link">
+            Don't have an account?
+            <a href="/register.html">Create one here</a>
+        </p>
+
+    </section>
+</main>
+
+<script>
+    const loginForm = document.getElementById("loginForm");
+    const loginMessage = document.getElementById("loginMessage");
+
+    loginForm.addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        loginMessage.textContent = "Signing you in...";
+
+        const email = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
+
+        try {
+            const response = await fetch("/api/customers/login", {
+                method: "POST",
+                credentials: "same-origin",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password
+                })
+            });
+            const result = await response.json()
+
+            if (!response.ok) {
+                    loginMessage.textContent =
+                        result.message || "Login failed. Please try again.";
+                    return;
+                }
+
+           if (result.id == null || !result.email) {
+                    loginMessage.textContent =
+                        "Customer details were not returned. please try again.";
+                    return;
+                }
+
+
+                // Save the actual logged-in customer's details
+                sessionStorage.setItem("customerId", String(result.id));
+                sessionStorage.setItem("customerEmail", result.email);
+                sessionStorage.setItem("artadeolaSignedIn", "true");
+
+                loginMessage.textContent = "Login successful! Redirecting...";
+
+                window.location.replace("/products.html");
+
+        } catch (error) {
+            console.error("Login error:", error);
+
+            loginMessage.textContent =
+                "Unable to complete login. Please try again.";
+        }
+        });
+
+</script>
+
+</body>
+</html>
