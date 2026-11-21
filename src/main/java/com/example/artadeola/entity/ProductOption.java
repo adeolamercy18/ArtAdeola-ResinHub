@@ -1,6 +1,7 @@
 package com.example.artadeola.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -12,22 +13,25 @@ public class ProductOption {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @ManyToOne
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
     private String name;
     private BigDecimal price;
-    private String available;
-    private Integer stockQuantity;
+    private Boolean available;
+    private Integer quantity;
 
-    public ProductOption(Long id, Product product, String name, BigDecimal price, String available, Integer stockQuantity) {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id", nullable = false)
+    private Product product;
+
+    public ProductOption() {
+    }
+
+    public ProductOption(Long id, String name, BigDecimal price, Boolean available, Integer quantity, Product product) {
         this.id = id;
-        this.product = product;
         this.name = name;
         this.price = price;
         this.available = available;
-        this.stockQuantity = stockQuantity;
+        this.quantity = quantity;
+        this.product = product;
     }
 
     public Long getId() {
@@ -36,14 +40,6 @@ public class ProductOption {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public Product getProduct() {
-        return product;
-    }
-
-    public void setProduct(Product product) {
-        this.product = product;
     }
 
     public String getName() {
@@ -62,19 +58,27 @@ public class ProductOption {
         this.price = price;
     }
 
-    public String getAvailable() {
+    public Boolean getAvailable() {
         return available;
     }
 
-    public void setAvailable(String available) {
+    public void setAvailable(Boolean available) {
         this.available = available;
     }
 
-    public Integer getStockQuantity() {
-        return stockQuantity;
+    public Integer getQuantity() {
+        return quantity;
     }
 
-    public void setStockQuantity(Integer stockQuantity) {
-        this.stockQuantity = stockQuantity;
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
+    }
+
+    public Product getProduct() {
+        return product;
+    }
+
+    public void setProduct(Product product) {
+        this.product = product;
     }
 }

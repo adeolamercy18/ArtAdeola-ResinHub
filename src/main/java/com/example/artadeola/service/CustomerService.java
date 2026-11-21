@@ -15,7 +15,6 @@ public class CustomerService {
 
     private final CustomerRepository customerRepository;
     private final PasswordEncoder passwordEncoder;
-
     public CustomerService(
             CustomerRepository customerRepository,
             PasswordEncoder passwordEncoder) {

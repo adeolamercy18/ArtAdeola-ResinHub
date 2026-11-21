@@ -32,8 +32,6 @@ public class CustomerController {
         this.customerRepository = customerRepository;
         this.passwordEncoder = passwordEncoder;
     }
-
-
     // Register a new customer
 
     @PostMapping("/register")

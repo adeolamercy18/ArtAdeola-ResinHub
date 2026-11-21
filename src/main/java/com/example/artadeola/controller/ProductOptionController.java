@@ -1,10 +1,9 @@
 
+
 package com.example.artadeola.controller;
 
-import com.example.artadeola.entity.Product;
 import com.example.artadeola.entity.ProductOption;
-import com.example.artadeola.repository.ProductOptionRepository;
-import com.example.artadeola.service.ProductService;
+import com.example.artadeola.service.ProductOptionService;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,76 +15,69 @@ import java.util.List;
 @CrossOrigin(origins = "*")
 public class ProductOptionController {
 
-    private final ProductOptionRepository optionRepository;
-    private final ProductService productService;
+    private final ProductOptionService productOptionService;
 
-    public ProductOptionController(
-            ProductOptionRepository optionRepository,
-            ProductService productService) {
-
-        this.optionRepository = optionRepository;
-        this.productService = productService;
+    public ProductOptionController(ProductOptionService productOptionService) {
+        this.productOptionService = productOptionService;
     }
 
-    // Add one option to a product
-    @PostMapping("/{productId}")
-    public ResponseEntity<?> addOption(
-            @PathVariable Long productId,
-            @RequestBody ProductOption option) {
-
-        Product product = productService.getProductById(productId)
-                .orElse(null);
-
-        if (product == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        option.setId(null);
-        option.setProduct(product);
-
-        ProductOption savedOption =
-                optionRepository.save(option);
-
-        return ResponseEntity.ok(savedOption);
+    // Get all product options
+    @GetMapping
+    public ResponseEntity<List<ProductOption>> getAllOptions() {
+        return ResponseEntity.ok(productOptionService.getAllOptions());
     }
 
-    // Add multiple options to a product at once
-    @PostMapping("/{productId}/bulk")
-    public ResponseEntity<?> addMultipleOptions(
-            @PathVariable Long productId,
-            @RequestBody List<ProductOption> options) {
-
-        Product product = productService.getProductById(productId)
-                .orElse(null);
-
-        if (product == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        if (options == null || options.isEmpty()) {
-            return ResponseEntity.badRequest()
-                    .body("Please provide at least one product option.");
-        }
-
-        for (ProductOption option : options) {
-            option.setId(null);
-            option.setProduct(product);
-        }
-
-        List<ProductOption> savedOptions =
-                optionRepository.saveAll(options);
-
-        return ResponseEntity.ok(savedOptions);
-    }
-
-    // Get all options belonging to a product
-    @GetMapping("/{productId}")
-    public ResponseEntity<List<ProductOption>> getOptions(
+    // Get options belonging to a particular product
+    @GetMapping("/product/{productId}")
+    public ResponseEntity<List<ProductOption>> getOptionsByProduct(
             @PathVariable Long productId) {
 
         return ResponseEntity.ok(
-                optionRepository.findByProductId(productId)
-        );
+                productOptionService.getOptionsByProduct(productId));
+    }
+
+    // Get a single product option
+    @GetMapping("/{id}")
+    public ResponseEntity<ProductOption> getOptionById(
+            @PathVariable Long id) {
+
+        return ResponseEntity.ok(
+                productOptionService.getOptionById(id));
+    }
+
+    // Add an option to a product
+    @PostMapping("/product/{productId}")
+    public ResponseEntity<ProductOption> saveOption(
+            @PathVariable Long productId,
+            @RequestBody ProductOption option) {
+
+        return ResponseEntity.ok(
+                productOptionService.saveOption(productId, option));
+    }
+
+    // Update an option
+    @PutMapping("/{id}")
+    public ResponseEntity<ProductOption> updateOption(
+            @PathVariable Long id,
+            @RequestBody ProductOption option) {
+
+        return ResponseEntity.ok(
+                productOptionService.updateOption(id, option));
+    }
+
+    // Delete an option
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteOption(@PathVariable Long id) {
+
+        productOptionService.deleteOption(id);
+
+        return ResponseEntity.noContent().build();
+    }
+    @PostMapping("/product/{productId}/bulk")
+    public ResponseEntity<List<ProductOption>> saveOptionsBulk(
+            @PathVariable Long productId,
+            @RequestBody List<ProductOption> options) {
+        return ResponseEntity.ok(
+                productOptionService.saveOptionsBulk(productId, options));
     }
 }
-

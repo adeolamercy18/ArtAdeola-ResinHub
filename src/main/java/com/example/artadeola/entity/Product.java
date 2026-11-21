@@ -20,13 +20,13 @@ public class Product {
     private String available;
     private String category;
     private String subcategory;
-
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ProductOption> options = new ArrayList<>();
-
-
+    private Boolean hasOptions = false;
 
     public Product(){
+    }
+
+    public Product(Boolean hasOptions) {
+        this.hasOptions = hasOptions;
     }
 
     public Product(Long id, String name, String description, BigDecimal price, String imageUrl, String available, String category, String subcategory) {
@@ -38,6 +38,7 @@ public class Product {
         this.available = available;
         this.category = category;
         this.subcategory  = subcategory;
+
     }
 
     public Long getId() {
@@ -105,11 +106,11 @@ public class Product {
         this.subcategory = subcategory;
     }
 
-    public List<ProductOption> getOptions() {
-        return options;
+    public Boolean getHasOptions() {
+        return hasOptions;
     }
 
-    public void setOptions(List<ProductOption> options) {
-        this.options = options;
+    public void setHasOptions(Boolean hasOptions) {
+        this.hasOptions = hasOptions;
     }
 }
